@@ -1,0 +1,416 @@
+{
+	"name": "Ingestion Pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "check_if_csv_exists",
+				"type": "Validation",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "source_csv",
+						"type": "DatasetReference"
+					},
+					"timeout": "0.00:10:00",
+					"sleep": 10
+				}
+			},
+			{
+				"name": "check_if_json_exists",
+				"type": "Validation",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "source_json",
+						"type": "DatasetReference"
+					},
+					"timeout": "0.00:10:00",
+					"sleep": 10
+				}
+			},
+			{
+				"name": "Get Metadata_csv",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "check_if_csv_exists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "source_csv",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"columnCount",
+						"exists",
+						"itemName",
+						"itemType",
+						"lastModified",
+						"size",
+						"structure"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"modifiedDatetimeEnd": null,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Get Metadata_json",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "check_if_json_exists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "source_json",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"exists",
+						"itemName",
+						"itemType",
+						"lastModified",
+						"size"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			},
+			{
+				"name": "source_not_present_csv",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "check_if_csv_exists",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "Source Not Present",
+					"errorCode": "400"
+				}
+			},
+			{
+				"name": "source_not_present_json",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "check_if_json_exists",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "Source Not Present",
+					"errorCode": "400"
+				}
+			},
+			{
+				"name": "send_alert_csv_not found",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "check_if_csv_exists",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": "https://prod-85.eastus.logic.azure.com:443/workflows/49d185caff764e88a7c36f6071433f6a/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=OKY8RLK7cARvRnl84YAXzEuQ2mEoLU61b-wQYwgawK4",
+					"body": {
+						"value": "@json(concat('{',\n  '\"subject\":\"ADF Pipeline Failed! <br>\",',\n  '\"body\":\"Pipeline: ', pipeline().Pipeline, ' Failed as Source CSV file is not present\"',\n'}'))\n \n ",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "send_alert_json_not found",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "check_if_json_exists",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": "https://prod-85.eastus.logic.azure.com:443/workflows/49d185caff764e88a7c36f6071433f6a/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=OKY8RLK7cARvRnl84YAXzEuQ2mEoLU61b-wQYwgawK4",
+					"body": {
+						"value": "@json(concat('{',\n  '\"subject\":\"ADF Pipeline Failed! <br>\",',\n  '\"body\":\"Pipeline: ', pipeline().Pipeline, ' Failed as Source JSON file is not present\"',\n'}'))\n \n ",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Get Metadata_csv",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Get Metadata_json",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@and(\n    greater(activity('Get Metadata_csv').output.columnCount,10),\n    greater(activity('Get Metadata_json').output.size, 49000000)\n)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "send_copyfail_msg",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": "https://prod-85.eastus.logic.azure.com:443/workflows/49d185caff764e88a7c36f6071433f6a/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=OKY8RLK7cARvRnl84YAXzEuQ2mEoLU61b-wQYwgawK4",
+								"body": {
+									"value": "@json(concat('{',\n  '\"subject\":\"ADF Pipeline Failed! <br>\",',\n  '\"body\":\"Pipeline: ', pipeline().Pipeline, ' Failed as condition not satisdfied\"',\n'}'))\n ",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Fail1",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "send_copyfail_msg",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": "Source is not correct",
+								"errorCode": "400"
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Source to Bronze CSV",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_csv",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_csv",
+									"type": "DatasetReference"
+								}
+							]
+						},
+						{
+							"name": "Source to Bronze JSON",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "JsonSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "JsonReadSettings"
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "source_json",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_json",
+									"type": "DatasetReference"
+								}
+							]
+						},
+						{
+							"name": "send_copysuccess_msg",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "Source to Bronze CSV",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Source to Bronze JSON",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": "https://prod-85.eastus.logic.azure.com:443/workflows/49d185caff764e88a7c36f6071433f6a/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=OKY8RLK7cARvRnl84YAXzEuQ2mEoLU61b-wQYwgawK4",
+								"body": {
+									"value": "@json(concat(\n  '{',\n    '\"subject\":\"ADF Pipeline Execution Completed Successfully\",',\n    '\"body\":\"',\n      'The ADF pipeline execution has completed successfully with the following details:\n',\n      'Pipeline Name: ', pipeline().Pipeline, '\n',\n      'Copy Activity: ', activity('Source to Bronze CSV').ActivityType, '\n',\n      'Status: ', activity('Source to Bronze CSV').Status, '\n',\n      'CSV Source File Name: ', activity('Get Metadata_csv').output.itemName, '\n',\n      'Json Source File Name: ', activity('Get Metadata_json').output.itemName, '\n',\n      'Destination: Bronze Data Lake\n',\n      'Column Count: ', string(activity('Get Metadata_csv').output.columnCount), '\n',\n      'File Size (Bytes): ', string(activity('Get Metadata_csv').output.size), '\n',\n      'Data Read (Bytes): ', string(activity('Source to Bronze CSV').output.dataRead), '\n',\n      'Data Written (Bytes): ', string(activity('Source to Bronze CSV').output.dataWritten),\n    '\"',\n  '}'\n))\n\n ",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"annotations": []
+	}
+}

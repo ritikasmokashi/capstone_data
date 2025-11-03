@@ -1,0 +1,74 @@
+{
+	"name": "source_json",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "bronze_datalake",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "json_dataset.json",
+				"fileSystem": "source"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"VIN (1-10)": {
+					"type": "string"
+				},
+				"County": {
+					"type": "string"
+				},
+				"City": {
+					"type": "string"
+				},
+				"State": {
+					"type": "string"
+				},
+				"Postal Code": {
+					"type": "string"
+				},
+				"Model Year": {
+					"type": "string"
+				},
+				"Make": {
+					"type": "string"
+				},
+				"Model": {
+					"type": "string"
+				},
+				"Electric Vehicle Type": {
+					"type": "string"
+				},
+				"Clean Alternative Fuel Vehicle (CAFV) Eligibility": {
+					"type": "string"
+				},
+				"Electric Range": {
+					"type": "string"
+				},
+				"Base MSRP": {
+					"type": "string"
+				},
+				"Legislative District": {
+					"type": "string"
+				},
+				"DOL Vehicle ID": {
+					"type": "string"
+				},
+				"Vehicle Location": {
+					"type": "string"
+				},
+				"Electric Utility": {
+					"type": "string"
+				},
+				"2020 Census Tract": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}

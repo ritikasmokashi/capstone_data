@@ -1,0 +1,132 @@
+{
+	"name": "source_csv",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "bronze_datalake",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "csv_dataset.csv",
+				"fileSystem": "source"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Vehicle_ID",
+				"type": "String"
+			},
+			{
+				"name": "Make_and_Model",
+				"type": "String"
+			},
+			{
+				"name": "Year_of_Manufacture",
+				"type": "String"
+			},
+			{
+				"name": "Vehicle_Type",
+				"type": "String"
+			},
+			{
+				"name": "Usage_Hours",
+				"type": "String"
+			},
+			{
+				"name": "Route_Info",
+				"type": "String"
+			},
+			{
+				"name": "Load_Capacity",
+				"type": "String"
+			},
+			{
+				"name": "Actual_Load",
+				"type": "String"
+			},
+			{
+				"name": "Last_Maintenance_Date",
+				"type": "String"
+			},
+			{
+				"name": "Maintenance_Type",
+				"type": "String"
+			},
+			{
+				"name": "Maintenance_Cost",
+				"type": "String"
+			},
+			{
+				"name": "Engine_Temperature",
+				"type": "String"
+			},
+			{
+				"name": "Tire_Pressure",
+				"type": "String"
+			},
+			{
+				"name": "Fuel_Consumption",
+				"type": "String"
+			},
+			{
+				"name": "Battery_Status",
+				"type": "String"
+			},
+			{
+				"name": "Vibration_Levels",
+				"type": "String"
+			},
+			{
+				"name": "Oil_Quality",
+				"type": "String"
+			},
+			{
+				"name": "Brake_Condition",
+				"type": "String"
+			},
+			{
+				"name": "Failure_History",
+				"type": "String"
+			},
+			{
+				"name": "Anomalies_Detected",
+				"type": "String"
+			},
+			{
+				"name": "Predictive_Score",
+				"type": "String"
+			},
+			{
+				"name": "Maintenance_Required",
+				"type": "String"
+			},
+			{
+				"name": "Weather_Conditions",
+				"type": "String"
+			},
+			{
+				"name": "Road_Conditions",
+				"type": "String"
+			},
+			{
+				"name": "Delivery_Times",
+				"type": "String"
+			},
+			{
+				"name": "Downtime_Maintenance",
+				"type": "String"
+			},
+			{
+				"name": "Impact_on_Efficiency",
+				"type": "String"
+			}
+		]
+	}
+}

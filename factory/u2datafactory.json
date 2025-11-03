@@ -1,0 +1,9 @@
+{
+	"name": "u2datafactory",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "b908db23-92a7-4101-b9ed-5b2a48a5d65a",
+		"tenantId": "c853abc0-64a4-447b-99f7-564ea0b8e378"
+	}
+}
